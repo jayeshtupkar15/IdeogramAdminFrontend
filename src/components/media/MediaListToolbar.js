@@ -8,7 +8,6 @@ import {
   SvgIcon
 } from '@material-ui/core';
 import { Search as SearchIcon, Trash2 as Trash2Icon } from 'react-feather';
-import CustomizedMedia from '../customizedMedia/CustomizedMedia';
 
 const MediaListToolbar = (props) => (
   <Box {...props}>
@@ -28,7 +27,6 @@ const MediaListToolbar = (props) => (
         sx={{ mx: 1 }}
         color="primary"
         variant="contained"
-        onClick={() => <CustomizedMedia />}
       >
         Create Media
       </Button>

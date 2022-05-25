@@ -10,9 +10,6 @@ import { Button, Box, CircularProgress } from '@material-ui/core';
 import { connect } from 'react-redux';
 import { saveMedia } from '../store/action/user';
 import { Alert, Stack } from '@mui/material';
-import 'tui-image-editor/dist/tui-image-editor.css';
-import ImageEditor from '@toast-ui/react-image-editor';
-import theme from '../components/customizedMedia/CustomizedMedia';
 import FilerobotImageEditor from 'react-filerobot-image-editor';
 
 const baseStyle = {
@@ -164,31 +161,6 @@ function StyledDropzone(props) {
   return (
     <div className="container">
       {openEditor && (
-        <ImageEditor
-          includeUI={{
-            loadImage: {
-              path: files[0].preview,
-              name: files[0].name
-            },
-            theme: theme,
-            menu: ['shape', 'filter', 'text'],
-            initMenu: 'filter',
-            uiSize: {
-              width: '1000px',
-              height: '700px'
-            },
-            menuBarPosition: 'bottom'
-          }}
-          usageStatistics={false}
-          cssMaxHeight={500}
-          cssMaxWidth={700}
-          selectionStyle={{
-            cornerSize: 20,
-            rotatingPointOffset: 70
-          }}
-        />
-      )}
-      {/* {openEditor && (
         <FilerobotImageEditor
           source={files[0].preview}
           onSave={(editedImageObject, designState) => {
@@ -203,7 +175,7 @@ function StyledDropzone(props) {
           defaultSavedImageName={files[0].name}
           defaultSavedImageType={files[0].type.split('/')[1]}
         />
-      )} */}
+      )}
       <Helmet>
         <title>Add Media | Ideogram</title>
       </Helmet>
