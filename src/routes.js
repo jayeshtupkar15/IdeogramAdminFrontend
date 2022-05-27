@@ -18,6 +18,7 @@ import MediaList from './pages/MediaList';
 import SaveSchedule from './pages/SaveSchedule';
 import SaveMonitor from './pages/SaveMonitor';
 import CustomizedMedia from './pages/CustomizedMedia';
+import EditImage from './pages/EditImage';
 
 const routes = [
   {
@@ -35,6 +36,7 @@ const routes = [
       { path: 'savemedia', element: <SaveMedia /> },
       { path: 'createmedia', element: <CustomizedMedia /> },
       { path: 'media', element: <MediaList /> },
+      { path: 'editimage', element: <EditImage/>},
       { path: 'saveschedule', element: <SaveSchedule /> },
       { path: 'savemonitor', element: <SaveMonitor /> },
       { path: 'createplaylist', element: <CreatePlaylist /> },
