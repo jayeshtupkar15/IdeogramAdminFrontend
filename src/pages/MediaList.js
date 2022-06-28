@@ -29,6 +29,7 @@ const MediaList = (props) => {
   const [selected, setselected] = useState([]);
   const [showmodal, setModal] = useState(false);
   const [showErrModal, setErrModal] = useState(false);
+  const [playlists, setPlaylists] = useState('');
 
   const navigate = useNavigate();
 
@@ -66,18 +67,22 @@ const MediaList = (props) => {
     // console.log('delete medialist selected:', selected);
     setModal(false);
     props.validateDeleteComponentList(deleteData, (err) => {
-      if(err.err === 'attached'){
-        setErrModal(true)
-      }else{
-        props.deleteComponentList(deleteData, (err) =>{
-          if (err.exists) {
-            console.log(err.errmessage);
-          } else {
-            setLoader(false);
-          }
-        })
+      if (err.exists) {
+        console.log(err);
+      } else {
+        if (err.err === 'attached') {
+          setPlaylists(err.playlistsAttached);
+          setErrModal(true);
+        } else {
+          props.deleteComponentList(deleteData, (err) => {
+            if (err.exists) {
+              console.log(err.errmessage);
+            } else {
+              setLoader(false);
+            }
+          });
+        }
       }
-
     });
   };
 
@@ -135,7 +140,8 @@ const MediaList = (props) => {
           >
             <Box sx={style}>
               <h4 id="parent-modal-title" style={{ marginBottom: 20 }}>
-                Cannot delete this media as it is running in some playlist
+                Cannot delete this media as it is running in {playlists}{' '}
+                playlist
               </h4>
               <Grid container>
                 <Grid item>
@@ -150,7 +156,10 @@ const MediaList = (props) => {
               </Grid>
             </Box>
           </Modal>
-          <MediaListToolbar selectedItems={selected} onclick={() => setModal(true)} />
+          <MediaListToolbar
+            selectedItems={selected}
+            onclick={() => setModal(true)}
+          />
 
           <MediaGrid media={mediaItem} setselected={setselected} />
         </Container>
@@ -168,9 +177,9 @@ const mapStateToProps = ({ root = {} }) => {
 const mapDispatchToProps = (dispatch) => ({
   getUserComponentList: (data, callback) =>
     dispatch(getUserComponentList(data, callback)),
-    validateDeleteComponentList: (data, callback) =>
+  validateDeleteComponentList: (data, callback) =>
     dispatch(validateDeleteComponentList(data, callback)),
-    deleteComponentList: (data, callback) =>
+  deleteComponentList: (data, callback) =>
     dispatch(deleteComponentList(data, callback))
 });
 

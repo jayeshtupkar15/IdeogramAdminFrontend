@@ -308,15 +308,21 @@ export const validateDeleteComponentList = (data, callback) => (dispatch) => {
       }
     })
       .then((res) => {
+        console.log(res.data, 'Delete comp');
         if (!res.data.Error) {
-          if(res.data.Details.IsComponentDeletable){
+          if (res.data.Details.IsComponentDeletable) {
             dispatch({
               type: DELETECOMPONENTLIST,
               payload: false
             });
             callback({ exits: false });
-          }else{
-            callback({ exits: true, err: 'attached'})
+          } else {
+            callback({
+              exits: true,
+              err: 'attached',
+              playlistsAttached:
+                res.data.Details.ActiveComponents[0].PlaylistName
+            });
           }
         } else {
           if (res.data.Error.ErrorCode === 10002) {
