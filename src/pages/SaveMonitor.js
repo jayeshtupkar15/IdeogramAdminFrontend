@@ -25,12 +25,15 @@ import {
   FormControlLabel,
   FormGroup,
   FormLabel,
-  FormControl
+  FormControl,
+  ListSubheader
 } from '@material-ui/core';
 import { COMPONENTS } from 'src/utils/constant';
 import { getUserComponentList, saveMonitor } from '../store/action/user';
 import { Alert, Stack } from '@mui/material';
 import { X as CloseIcon, Plus } from 'react-feather';
+import Chip from '@material-ui/core/Chip';
+import Input from '@material-ui/core/Input';
 
 const SaveMonitorDetails = (props) => {
   const { component } = props || null;
@@ -53,8 +56,9 @@ const SaveMonitorDetails = (props) => {
     (state && state.PlaylistRef) || ''
   );
   const [selectedSchedule, setSelectedSchedule] = useState(
-    (state && state.ScheduleRef) || ''
+    (state && state.Schedules) || []
   );
+
   const [loader, setloader] = useState(true);
   const [scheduleloader, setScheduleloader] = useState(true);
   const [orientation, setOrientation] = useState(
@@ -75,7 +79,7 @@ const SaveMonitorDetails = (props) => {
   // const [disable, setDisable] = useState([]);
   let days = (state && state.Days && state.Days.split(',')) || [];
   const orientations = ['Portrait', 'Landscape'];
-  const [extraSchedule, setExtraSchedule] = useState([]);
+
   const min = 5;
   const max = 60;
   const step = 5;
@@ -117,8 +121,12 @@ const SaveMonitorDetails = (props) => {
       }
     });
 
-    setScheduleData(schedule);
+    setScheduleData([...state.Schedules, ...schedule]);
   }, [loader, scheduleloader]);
+
+  const saveData = () => {
+    console.log(selectedSchedule);
+  };
 
   function saveMonitorData() {
     const saveMonitorDetails = {
@@ -147,9 +155,9 @@ const SaveMonitorDetails = (props) => {
     });
   }
 
-  const handleAddSchedule = () => {
-    counter++;
-    setExtraSchedule((prev) => [...prev, counter]);
+  const handleChange = (e, index) => {
+    console.log('Selected Schedule', e.target.value);
+    setSelectedSchedule(e.target.value);
   };
 
   return (
@@ -244,73 +252,33 @@ const SaveMonitorDetails = (props) => {
                   <Select
                     labelId="select-schedule"
                     id="select-schedule"
+                    multiple
                     value={selectedSchedule}
                     label="schedule"
-                    onChange={(e) => {
-                      console.log('e.target.value', e.target.value);
-                      setSelectedSchedule(e.target.value);
-                    }}
+                    renderValue={(selected) => (
+                      <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                        {selected.map((value, index) => (
+                          <Chip
+                            key={index}
+                            label={value.Title}
+                            style={{ margin: 2 }}
+                          />
+                        ))}
+                      </div>
+                    )}
+                    onChange={handleChange}
                   >
                     {scheduleData && scheduleData.length > 0 ? (
-                      scheduleData.map((item) => (
-                        <MenuItem value={item.ScheduleRef}>
-                          {`${item.Title}`}
-                        </MenuItem>
-                      ))
+                      scheduleData.map((item) => {
+                        return (
+                          <MenuItem value={item}>{`${item.Title}`}</MenuItem>
+                        );
+                      })
                     ) : (
                       <MenuItem>No Items available</MenuItem>
                     )}
                   </Select>
-                  <Button
-                    startIcon={<CloseIcon size={17} />}
-                    style={{ marginLeft: 10 }}
-                    onClick={() => {
-                      setSelectedSchedule(0);
-                    }}
-                  >
-                    Clear
-                  </Button>
                 </Box>
-                {extraSchedule.map(() => (
-                  <Box>
-                    <Select
-                      labelId="select-schedule"
-                      id="select-schedule"
-                      value={selectedSchedule}
-                      label="schedule"
-                      onChange={(e) => {
-                        console.log('e.target.value', e.target.value);
-                        setSelectedSchedule(e.target.value);
-                      }}
-                    >
-                      {scheduleData && scheduleData.length > 0 ? (
-                        scheduleData.map((item) => (
-                          <MenuItem value={item.ScheduleRef}>
-                            {`${item.Title}`}
-                          </MenuItem>
-                        ))
-                      ) : (
-                        <MenuItem>No Items available</MenuItem>
-                      )}
-                    </Select>
-                    <Button
-                      startIcon={<CloseIcon size={17} />}
-                      style={{ marginLeft: 10 }}
-                      onClick={() => {
-                        setSelectedSchedule(0);
-                      }}
-                    >
-                      Clear
-                    </Button>
-                  </Box>
-                ))}
-                <Button
-                  startIcon={<Plus size={17} />}
-                  style={{ marginTop: 10 }}
-                  onClick={handleAddSchedule}
-                >
-                  Add Schedule
-                </Button>
                 <InputLabel id="select-orientation">
                   Select Orientation
                 </InputLabel>
@@ -351,10 +319,10 @@ const SaveMonitorDetails = (props) => {
                     color="primary"
                     fullWidth
                     size="large"
-                    type="submit"
+                    // type="submit"
                     variant="contained"
                     onClick={() => {
-                      saveMonitorData();
+                      saveData();
                     }}
                     disabled={slideTime < 5 || slideTime > 60}
                   >
