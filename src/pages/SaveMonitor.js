@@ -33,7 +33,8 @@ import { getUserComponentList, saveMonitor } from '../store/action/user';
 import { Alert, Stack } from '@mui/material';
 import { X as CloseIcon, Plus } from 'react-feather';
 import Chip from '@material-ui/core/Chip';
-import Input from '@material-ui/core/Input';
+import { IsValuePresentInArray } from 'src/utils/helperFunctions';
+import { CancelRounded } from '@material-ui/icons';
 
 const SaveMonitorDetails = (props) => {
   const { component } = props || null;
@@ -55,10 +56,9 @@ const SaveMonitorDetails = (props) => {
   const [selectedPlaylist, setSelectedPlaylist] = useState(
     (state && state.PlaylistRef) || ''
   );
-  const [selectedSchedule, setSelectedSchedule] = useState(
-    (state && state.Schedules) || []
-  );
-
+  const [selectedSchedule, setSelectedSchedule] = useState([]);
+  const [deletedSchedules, setDeletedSchedules] = useState([]);
+  const [updatedSchedules, setUpdatedSchedules] = useState([]);
   const [loader, setloader] = useState(true);
   const [scheduleloader, setScheduleloader] = useState(true);
   const [orientation, setOrientation] = useState(
@@ -83,7 +83,6 @@ const SaveMonitorDetails = (props) => {
   const min = 5;
   const max = 60;
   const step = 5;
-  var counter = 1;
 
   useEffect(() => {
     const data = {
@@ -121,11 +120,32 @@ const SaveMonitorDetails = (props) => {
       }
     });
 
-    setScheduleData([...state.Schedules, ...schedule]);
+    setScheduleData(schedule);
+    const prevList = [];
+
+    state &&
+      state.Schedules &&
+      state.Schedules.map((items) => {
+        if (items.IsActive === 1) {
+          prevList.push({
+            ScheduleRef: items.ScheduleRef,
+            IsActive: 1,
+            Title: items.Title
+          });
+        }
+      });
+
+    setSelectedSchedule(prevList);
+    console.log('prevList', prevList);
   }, [loader, scheduleloader]);
 
   const saveData = () => {
     console.log(selectedSchedule);
+    console.log(deletedSchedules);
+
+    // selectedSchedule.map(item=>{
+    //   setUpdatedSchedules(prev=>[...prev,{ScheduleRef: item.ScheduleRef, IsActive: 1}]);
+    // })
   };
 
   function saveMonitorData() {
@@ -155,9 +175,21 @@ const SaveMonitorDetails = (props) => {
     });
   }
 
-  const handleChange = (e, index) => {
-    console.log('Selected Schedule', e.target.value);
+  const handleChange = (e) => {
+    console.log('Schedule Changed', e.target.value);
     setSelectedSchedule(e.target.value);
+  };
+
+  const handleRemoveSchedule = (e, value) => {
+    if (
+      !IsValuePresentInArray(deletedSchedules, 'ScheduleRef', value.ScheduleRef)
+    ) {
+      deletedSchedules.push({ ScheduleRef: value.ScheduleRef, IsActive: 0 });
+      console.log('Removed schedule', deletedSchedules);
+    }
+    setSelectedSchedule(
+      selectedSchedule.filter((item) => item.ScheduleRef !== value.ScheduleRef)
+    );
   };
 
   return (
@@ -262,6 +294,13 @@ const SaveMonitorDetails = (props) => {
                             key={index}
                             label={value.Title}
                             style={{ margin: 2 }}
+                            clickable
+                            onDelete={(e) => handleRemoveSchedule(e, value)}
+                            deleteIcon={
+                              <CancelRounded
+                                onMouseDown={(event) => event.stopPropagation()}
+                              />
+                            }
                           />
                         ))}
                       </div>
@@ -270,9 +309,17 @@ const SaveMonitorDetails = (props) => {
                   >
                     {scheduleData && scheduleData.length > 0 ? (
                       scheduleData.map((item) => {
-                        return (
-                          <MenuItem value={item}>{`${item.Title}`}</MenuItem>
-                        );
+                        if (
+                          !IsValuePresentInArray(
+                            selectedSchedule,
+                            'ScheduleRef',
+                            item.ScheduleRef
+                          )
+                        ) {
+                          return (
+                            <MenuItem value={item}>{`${item.Title}`}</MenuItem>
+                          );
+                        }
                       })
                     ) : (
                       <MenuItem>No Items available</MenuItem>
