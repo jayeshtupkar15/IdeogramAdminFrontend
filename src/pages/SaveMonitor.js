@@ -35,6 +35,7 @@ import { X as CloseIcon, Plus } from 'react-feather';
 import Chip from '@material-ui/core/Chip';
 import { IsValuePresentInArray } from 'src/utils/helperFunctions';
 import { CancelRounded } from '@material-ui/icons';
+import Snackbar from '@material-ui/core/Snackbar';
 
 const SaveMonitorDetails = (props) => {
   const { component } = props || null;
@@ -79,6 +80,7 @@ const SaveMonitorDetails = (props) => {
   // const [disable, setDisable] = useState([]);
   let days = (state && state.Days && state.Days.split(',')) || [];
   const orientations = ['Portrait', 'Landscape'];
+  const [openSnackbar, setOpenSnackbar] = useState(false);
 
   const min = 5;
   const max = 60;
@@ -125,13 +127,9 @@ const SaveMonitorDetails = (props) => {
 
     state &&
       state.Schedules &&
-      state.Schedules.map((items) => {
-        if (items.IsActive === 1) {
-          prevList.push({
-            ScheduleRef: items.ScheduleRef,
-            IsActive: 1,
-            Title: items.Title
-          });
+      state.Schedules.map((item) => {
+        if (item.IsActive === 1) {
+          prevList.push(item);
         }
       });
 
@@ -139,21 +137,23 @@ const SaveMonitorDetails = (props) => {
     console.log('prevList', prevList);
   }, [loader, scheduleloader]);
 
-  const saveData = () => {
-    console.log(selectedSchedule);
-    console.log(deletedSchedules);
-
-    // selectedSchedule.map(item=>{
-    //   setUpdatedSchedules(prev=>[...prev,{ScheduleRef: item.ScheduleRef, IsActive: 1}]);
-    // })
-  };
+  // const saveData = () => {
+  //   console.log(selectedSchedule);
+  //   console.log(deletedSchedules);
+  //   // saveMonitorData();
+  // };
 
   function saveMonitorData() {
+    const selectedSchedules = selectedSchedule.map((item) => ({
+      ScheduleRef: item.ScheduleRef,
+      IsActive: item.IsActive
+    }));
+
     const saveMonitorDetails = {
       MonitorName: title,
       Description: description,
       DefaultPlaylistRef: selectedPlaylist,
-      ScheduleRef: selectedSchedule,
+      Schedules: [...selectedSchedules, ...deletedSchedules],
       IsActive: 1,
       Orientation: orientation === 'Landscape' ? '90' : '0',
       SlideTime: slideTime
@@ -178,6 +178,17 @@ const SaveMonitorDetails = (props) => {
   const handleChange = (e) => {
     console.log('Schedule Changed', e.target.value);
     setSelectedSchedule(e.target.value);
+    let deletedarr = [];
+    e.target.value.map((item) => {
+      if (
+        IsValuePresentInArray(deletedSchedules, 'ScheduleRef', item.ScheduleRef)
+      ) {
+        deletedarr = deletedSchedules.filter(
+          (deletedSchedule) => deletedSchedule.IsActive === item.IsActive
+        );
+      }
+    });
+    setDeletedSchedules(deletedarr);
   };
 
   const handleRemoveSchedule = (e, value) => {
@@ -190,6 +201,102 @@ const SaveMonitorDetails = (props) => {
     setSelectedSchedule(
       selectedSchedule.filter((item) => item.ScheduleRef !== value.ScheduleRef)
     );
+  };
+
+  const handleDateAndTime = () => {
+    for (let i = 0; i < selectedSchedule.length; i++) {
+      for (let j = i + 1; j < selectedSchedule.length; j++) {
+        if (selectedSchedule[i].StartTime < selectedSchedule[j].StartTime) {
+          if (selectedSchedule[i].EndTime < selectedSchedule[j].StartTime) {
+            console.log('Pass 1', selectedSchedule[i], selectedSchedule[j]);
+            // saveMonitorData();
+          } else {
+            if (selectedSchedule[i].StartDate < selectedSchedule[j].StartDate) {
+              if (selectedSchedule[i].EndDate < selectedSchedule[j].StartDate) {
+                console.log('Pass 2', selectedSchedule[i], selectedSchedule[j]);
+                // saveMonitorData();
+              } else {
+                setOpenSnackbar(true);
+                console.log('Clash', selectedSchedule[i], selectedSchedule[j]);
+                return;
+              }
+            } else if (
+              selectedSchedule[i].StartDate > selectedSchedule[j].StartDate
+            ) {
+              if (selectedSchedule[i].StartDate > selectedSchedule[j].EndDate) {
+                console.log('Pass 3', selectedSchedule[i], selectedSchedule[j]);
+                // saveMonitorData();
+              } else {
+                setOpenSnackbar(true);
+                console.log('Clash', selectedSchedule[i], selectedSchedule[j]);
+                return;
+              }
+            }
+          }
+        } else if (
+          selectedSchedule[i].StartTime > selectedSchedule[j].StartTime
+        ) {
+          if (selectedSchedule[i].StartTime > selectedSchedule[j].EndTime) {
+            console.log('Pass 4', selectedSchedule[i], selectedSchedule[j]);
+            // saveMonitorData();
+          } else {
+            if (selectedSchedule[i].StartDate < selectedSchedule[j].StartDate) {
+              if (selectedSchedule[i].EndDate < selectedSchedule[j].StartDate) {
+                console.log('Pass 5', selectedSchedule[i], selectedSchedule[j]);
+                // saveMonitorData();
+              } else {
+                setOpenSnackbar(true);
+                console.log('Clash', selectedSchedule[i], selectedSchedule[j]);
+                return;
+              }
+            } else if (
+              selectedSchedule[i].StartDate > selectedSchedule[j].StartDate
+            ) {
+              if (selectedSchedule[i].StartDate > selectedSchedule[j].EndDate) {
+                console.log('Pass 6', selectedSchedule[i], selectedSchedule[j]);
+                // saveMonitorData();
+              } else {
+                setOpenSnackbar(true);
+                console.log('Clash', selectedSchedule[i], selectedSchedule[j]);
+                return;
+              }
+            }
+          }
+        } else if (
+          selectedSchedule[i].StartTime === selectedSchedule[j].StartTime
+        ) {
+          if (selectedSchedule[i].StartDate < selectedSchedule[j].StartDate) {
+            if (selectedSchedule[i].EndDate < selectedSchedule[j].StartDate) {
+              console.log('Pass 7', selectedSchedule[i], selectedSchedule[j]);
+              // saveMonitorData();
+            } else {
+              setOpenSnackbar(true);
+              console.log('Clash', selectedSchedule[i], selectedSchedule[j]);
+              return;
+            }
+          } else if (
+            selectedSchedule[i].StartDate > selectedSchedule[j].StartDate
+          ) {
+            if (selectedSchedule[i].StartDate > selectedSchedule[j].EndDate) {
+              console.log('Pass 8', selectedSchedule[i], selectedSchedule[j]);
+              // saveMonitorData();
+            } else {
+              setOpenSnackbar(true);
+              console.log('Clash', selectedSchedule[i], selectedSchedule[j]);
+              return;
+            }
+          }
+        }
+      }
+    }
+  };
+
+  const handleCloseSnackBar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpenSnackbar(false);
   };
 
   return (
@@ -206,6 +313,16 @@ const SaveMonitorDetails = (props) => {
           justifyContent: 'center'
         }}
       >
+        <Snackbar
+          open={openSnackbar}
+          key={'top'}
+          autoHideDuration={5000}
+          onClose={handleCloseSnackBar}
+        >
+          <Alert onClose={handleCloseSnackBar} severity="error">
+            This is an error message!
+          </Alert>
+        </Snackbar>
         <Container maxWidth="sm">
           <Formik
             initialValues={{
@@ -369,7 +486,7 @@ const SaveMonitorDetails = (props) => {
                     // type="submit"
                     variant="contained"
                     onClick={() => {
-                      saveData();
+                      handleDateAndTime();
                     }}
                     disabled={slideTime < 5 || slideTime > 60}
                   >
