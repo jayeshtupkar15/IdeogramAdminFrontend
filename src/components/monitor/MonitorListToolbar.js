@@ -26,12 +26,6 @@ const MonitorListToolbar = (props) => {
   const [selectedPlaylist, setSelectedPlaylist] = useState('');
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
-  // console.log(props.monitorList);
-
-  useEffect(() => {}, []);
-
-  const monitorRefs = props.monitorList?.map((item) => item.MonitorRef);
-
   const handleCloseSnackBar = (event, reason) => {
     if (reason === 'clickaway') {
       return;
@@ -41,7 +35,7 @@ const MonitorListToolbar = (props) => {
 
   const handlePushToAll = () => {
     const data = {
-      MonitorList: monitorRefs,
+      MonitorList: props.selectedMonitorList,
       PlaylistRef: selectedPlaylist
     };
 
@@ -115,7 +109,10 @@ const MonitorListToolbar = (props) => {
                   onClick={handlePushToAll}
                   color="primary"
                   variant="contained"
-                  disabled={selectedPlaylist == ''}
+                  disabled={
+                    selectedPlaylist == '' ||
+                    props.selectedMonitorList.length == 0
+                  }
                 >
                   Push To All Monitors
                 </Button>

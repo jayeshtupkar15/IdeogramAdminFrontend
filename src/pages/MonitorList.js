@@ -123,6 +123,7 @@ const MonitorList = (props) => {
             onclick={() => setModal(true)}
             playlistList={monitorlist?.playlistList}
             monitorList={monitorlist?.list}
+            selectedMonitorList={selected}
           />
           <Box sx={{ pt: 3 }}>
             <MonitorListResults
